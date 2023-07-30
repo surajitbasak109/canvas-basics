@@ -14,15 +14,16 @@ window.addEventListener('load', () => {
   ctx.shadowBlur = 10;
 
   // effect settings
-  const maxLevel = 8;
-  const branches = 2;
+  const maxLevel = 10;
+  const branches = 1;
   let size =
-    canvas.width < canvas.height ? canvas.width * 0.3 : canvas.height * 0.3;
-  let sides = 5;
+    canvas.width < canvas.height ? canvas.width * 0.1 : canvas.height * 0.1;
+  let sides = 10;
   let scale = 0.7;
-  let spread = 0.5;
+  let spread = -0.2;
   let color = `hsl(${Math.random() * 360},100%,50%)`;
-  let lineWidth = Math.floor(Math.random() * 20 + 10);
+  let lineWidth = 30;
+
   //   controls
   const randomizeButton = document.getElementById('randomizeButton');
   const resetButton = document.getElementById('resetButton');
@@ -55,17 +56,26 @@ window.addEventListener('load', () => {
     drawFractal();
   });
 
+  let pointX = 0;
+  let pointY = size;
   function drawBranch(level) {
     if (level > maxLevel) return;
 
     ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.lineTo(size, 0);
+    ctx.moveTo(pointX, pointY);
+    ctx.bezierCurveTo(
+      0,
+      size * spread * -3,
+      size * 5,
+      size * 10 * spread,
+      30,
+      30
+    );
     ctx.stroke();
 
     for (let i = 0; i < branches; i++) {
       ctx.save();
-      ctx.translate(size - (size / branches) * i, 0);
+      ctx.translate(pointX, pointY);
       ctx.scale(scale, scale);
 
       ctx.save();
@@ -75,8 +85,9 @@ window.addEventListener('load', () => {
 
       ctx.restore();
     }
+    ctx.fillStyle = color;
     ctx.beginPath();
-    ctx.arc(0, size, size * 0.1, 0, Math.PI * 2);
+    ctx.arc(-size / 2, 0, 40, 0, Math.PI * 2);
     ctx.fill();
   }
 
@@ -88,7 +99,8 @@ window.addEventListener('load', () => {
     ctx.translate(canvas.width / 2, canvas.height / 2);
 
     for (let i = 0; i < sides; i++) {
-      ctx.rotate((Math.PI * 2) / sides);
+      ctx.scale(0.95, 0.95);
+      ctx.rotate((Math.PI * 6) / sides);
       drawBranch(0);
     }
     ctx.restore();
@@ -96,19 +108,18 @@ window.addEventListener('load', () => {
   }
 
   function randomizeFractal() {
-    sides = Math.floor(Math.random() * 7 + 2);
-    scale = Math.random() * 0.4 + 0.4;
-    spread = Math.random() * 2.9 + 0.1;
+    sides = Math.floor(Math.random() * 18 + 2);
+    spread = Math.random() * 0.6 - 0.3;
     color = `hsl(${Math.random() * 360},100%,50%)`;
-    lineWidth = Math.floor(Math.random() * 20 + 10);
+    lineWidth = Math.floor(Math.random() * 30 + 20);
   }
 
   function resetFactral() {
-    sides = 5;
-    scale = 0.5;
+    sides = 15;
+    scale = 0.85;
     spread = 0.7;
     color = `hsl(290,100%,50%)`;
-    lineWidth = 15;
+    lineWidth = 30;
   }
 
   function updateSliders() {
@@ -124,12 +135,12 @@ window.addEventListener('load', () => {
   window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-	size =
-    canvas.width < canvas.height ? canvas.width * 0.3 : canvas.height * 0.3;
-	ctx.shadowColor = 'rgba(0,0,0,0.5)';
-	ctx.shadowOffsetX = 10;
-	ctx.shadowOffsetY = 5;
-	ctx.shadowBlur = 10;
+    size =
+      canvas.width < canvas.height ? canvas.width * 0.1 : canvas.height * 0.1;
+    ctx.shadowColor = 'rgba(0,0,0,0.5)';
+    ctx.shadowOffsetX = 10;
+    ctx.shadowOffsetY = 5;
+    ctx.shadowBlur = 10;
     drawFractal();
   });
 });
