@@ -30,4 +30,11 @@ button {
   padding: 10px 40px;
   width: 225px;
   font-size: 20px;
+  margin-bottom: 6px;
+}
+
+label,
+input {
+  color: white;
+  font-size: 20px;
 }

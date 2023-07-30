@@ -25,6 +25,20 @@ window.addEventListener('load', () => {
   let lineWidth = Math.floor(Math.random() * 20 + 10);
   //   controls
   const randomizeButton = document.getElementById('randomizeButton');
+  const slider_spread = document.getElementById('spread');
+  const label_spread = document.querySelector('[for="spread"]');
+
+  slider_spread.addEventListener('change', (e) => {
+    spread = Number(e.target.value);
+    updateSliders();
+    drawFractal();
+  });
+
+  randomizeButton.addEventListener('click', () => {
+    randomizeFractal();
+    updateSliders();
+    drawFractal();
+  });
 
   function drawBranch(level) {
     if (level > maxLevel) return;
@@ -75,9 +89,11 @@ window.addEventListener('load', () => {
     lineWidth = Math.floor(Math.random() * 20 + 10);
   }
 
+  function updateSliders() {
+    slider_spread.value = spread;
+    label_spread.innerText = `Spread: ${spread.toFixed(1)}`;
+  }
+
   drawFractal();
-  randomizeButton.addEventListener('click', () => {
-    randomizeFractal();
-    drawFractal();
-  });
+  updateSliders();
 });
