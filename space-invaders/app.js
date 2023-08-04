@@ -52,6 +52,15 @@ class Game {
       if (this.projectilesPool[i].free) return this.projectilesPool[i];
     }
   }
+  // collision detection between 2 rectangles
+  checkCollision(rect1, rect2) {
+    return (
+      rect1.x < rect2.x + rect2.width &&
+      rect1.x + rect1.width > rect2.x &&
+      rect1.y < rect2.y + rect2.height &&
+      rect1.y + rect1.height > rect2.y
+    );
+  }
 }
 
 class Player {
@@ -139,6 +148,7 @@ class Enemy {
     this.y = 0;
     this.positionX = postionX;
     this.positionY = positionY;
+    this.markedForDeletion = false;
   }
 
   draw(context) {
@@ -148,6 +158,14 @@ class Enemy {
   update(x, y) {
     this.x = x + this.positionX;
     this.y = y + this.positionY;
+
+    // check collisions enemies - projectiles
+    this.game.projectilesPool.forEach((projectile) => {
+      if (!projectile.free && this.game.checkCollision(this, projectile)) {
+        this.markedForDeletion = true;
+        projectile.reset();
+      }
+    });
   }
 }
 
@@ -176,7 +194,8 @@ class Wave {
     this.enemies.forEach((enemy) => {
       enemy.update(this.x, this.y);
       enemy.draw(context);
-    })
+    });
+    this.enemies = this.enemies.filter((enemy) => !enemy.markedForDeletion);
   }
 
   create() {
