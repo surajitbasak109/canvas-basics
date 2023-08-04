@@ -6,29 +6,47 @@ class Game {
     this.keys = [];
     this.player = new Player(this);
 
-    // event listeners
-    window.addEventListener('keydown', (event) => {
-      if (this.keys.indexOf(event.key) === -1) {
-        this.keys.push(event.key);
-      }
-    })
+    this.projectilesPool = [];
+    this.numberOfProjectiles = 10;
+    this.createProjectiles();
 
-    window.addEventListener('keyup', (event) => {
+    // event listeners
+    window.addEventListener("keydown", (event) => {
+      if (this.keys.indexOf(event.key) === -1) this.keys.push(event.key);
+      if (event.key == " ") this.player.shoot();
+    });
+
+    window.addEventListener("keyup", (event) => {
       const index = this.keys.indexOf(event.key);
-      if (index > -1) {
-        this.keys.splice(index, 1);
-      }
-    })
+      if (index > -1) this.keys.splice(index, 1);
+    });
   }
 
   render(context) {
     this.player.draw(context);
     this.player.update();
+    this.projectilesPool.forEach((projectile) => {
+      projectile.update();
+      projectile.draw(context);
+    });
+  }
+
+  // create projectiles object pool
+  createProjectiles() {
+    for (let i = 0; i < this.numberOfProjectiles; i++) {
+      this.projectilesPool.push(new Projectile());
+    }
+  }
+  // get free  projectile object from the pool
+  getProjectile() {
+    for (let i = 0; i < this.projectilesPool.length; i++) {
+      if (this.projectilesPool[i].free) return this.projectilesPool[i];
+    }
   }
 }
 
 class Player {
-  constructor (game) {
+  constructor(game) {
     this.game = game;
     this.width = 100;
     this.height = 100;
@@ -42,25 +60,72 @@ class Player {
   }
 
   update() {
-    if (this.game.keys.indexOf('ArrowLeft') > -1 && this.x > 0) {
-      this.x -= this.speed;
-    } else if (this.game.keys.indexOf('ArrowRight') > -1 && this.x < this.game.width - this.width) {
-      this.x += this.speed;
-    }
+    // horizontal movement
+    if (this.game.keys.indexOf("ArrowLeft") > -1) this.x -= this.speed;
+    else if (this.game.keys.indexOf("ArrowRight") > -1) this.x += this.speed;
+
+    // horizontal boundaries
+    if (this.x < -this.width * 0.5) this.x = -this.width * 0.5;
+    else if (this.x > this.game.width - this.width * 0.5)
+      this.x = this.game.width - this.width * 0.5;
+  }
+  shoot() {
+    const projectile = this.game.getProjectile();
+    projectile?.start(this.x + this.width / 2, this.y);
   }
 }
 
+/**
+ * Projectile class
+ * Using Object Pool Design Patter
+ * It allows us to avoid performance issues related to automatic
+ * memory allocation and garbage collection processes, that
+ * trigger when we create and destroy large amount of JavaScript
+ * objects.
+ *
+ * Creational Design Pattern
+ * provides various object creation mechanisms, which increase
+ * flexibility and reuse of existing code
+ */
+
 class Projectile {
+  constructor() {
+    this.width = 10;
+    this.height = 20;
+    this.x = 0;
+    this.y = 0;
+    this.speed = 20;
+    this.free = true;
+  }
+  draw(context) {
+    if (!this.free) {
+      context.fillRect(this.x, this.y, this.width, this.height);
+    }
+  }
 
+  update() {
+    if (!this.free) {
+      this.y -= this.speed;
+      if (this.y < -this.height) this.reset();
+    }
+  }
+
+  start(x, y) {
+    this.x = x - this.width / 2;
+    this.y = y;
+    this.free = false;
+  }
+
+  reset() {
+    this.free = true;
+  }
 }
 
-class Enemy {
+class Enemy {}
 
-}
-
-window.addEventListener('load', () => {
-  const canvas = document.getElementById('canvas');
-  const ctx = canvas.getContext('2d');
+window.addEventListener("load", () => {
+  const canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
   canvas.width = 600;
   canvas.height = 800;
 
@@ -73,4 +138,4 @@ window.addEventListener('load', () => {
   }
 
   animate();
-})
+});
