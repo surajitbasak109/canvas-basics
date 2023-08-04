@@ -10,6 +10,12 @@ class Game {
     this.numberOfProjectiles = 10;
     this.createProjectiles();
 
+    this.columns = 3;
+    this.rows = 3;
+    this.enemySize = 60;
+
+    this.waves = [];
+    this.waves.push(new Wave(this));
     // event listeners
     window.addEventListener("keydown", (event) => {
       if (this.keys.indexOf(event.key) === -1) this.keys.push(event.key);
@@ -28,6 +34,9 @@ class Game {
     this.projectilesPool.forEach((projectile) => {
       projectile.update();
       projectile.draw(context);
+    });
+    this.waves.forEach((wave) => {
+      wave.render(context);
     });
   }
 
@@ -121,13 +130,74 @@ class Projectile {
   }
 }
 
-class Enemy {}
+class Enemy {
+  constructor(game, postionX, positionY) {
+    this.game = game;
+    this.width = this.game.enemySize;
+    this.height = this.game.enemySize;
+    this.x = 0;
+    this.y = 0;
+    this.positionX = postionX;
+    this.positionY = positionY;
+  }
+
+  draw(context) {
+    context.strokeRect(this.x, this.y, this.width, this.height);
+  }
+
+  update(x, y) {
+    this.x = x + this.positionX;
+    this.y = y + this.positionY;
+  }
+}
+
+class Wave {
+  constructor(game) {
+    this.game = game;
+    this.width = this.game.columns * this.game.enemySize;
+    this.height = this.game.rows * this.game.enemySize;
+    this.x = 0;
+    this.y = -this.height;
+    this.speedX = 3;
+    this.speedY = 0;
+    this.enemies = [];
+    this.create();
+  }
+  render(context) {
+    if (this.y < 0) this.y += 5;
+    this.speedY = 0;
+    if (this.x > this.game.width - this.width || this.x < 0) {
+      this.speedX *= -1;
+      this.speedY = this.game.enemySize;
+    }
+    this.x += this.speedX;
+    this.y += this.speedY;
+
+    this.enemies.forEach((enemy) => {
+      enemy.update(this.x, this.y);
+      enemy.draw(context);
+    })
+  }
+
+  create() {
+    for (let y = 0; y < this.game.rows; y++) {
+      for (let x = 0; x < this.game.columns; x++) {
+        let enemyX = x * this.game.enemySize;
+        let enemyY = y * this.game.enemySize;
+        this.enemies.push(new Enemy(this.game, enemyX, enemyY));
+      }
+    }
+  }
+}
 
 window.addEventListener("load", () => {
   const canvas = document.getElementById("canvas");
   const ctx = canvas.getContext("2d");
   canvas.width = 600;
   canvas.height = 800;
+  ctx.fillStyle = "white";
+  ctx.strokeStyle = "white";
+  ctx.lineWidth = 5;
 
   const game = new Game(canvas);
 
