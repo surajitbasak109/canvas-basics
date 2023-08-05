@@ -20,6 +20,10 @@ class Game {
     this.waves.push(new Wave(this));
     this.waveCount = 1;
 
+    this.spriteUpdated = false;
+    this.spriteTimer = 0;
+    this.spriteInterval = 120;
+
     this.score = 0;
     this.gameOver = false;
 
@@ -39,7 +43,16 @@ class Game {
     });
   }
 
-  render(context) {
+  render(context, deltaTime) {
+    // sprite timing
+    if (this.spriteTimer > this.spriteInterval) {
+      this.spriteUpdated = true;
+      this.spriteTimer = 0;
+    } else {
+      this.spriteUpdated = false;
+      this.spriteTimer += deltaTime;
+    }
+
     this.drawStatusText(context);
     this.player.draw(context);
     this.player.update();
@@ -244,14 +257,18 @@ class Enemy {
 
     // check collisions enemies - projectiles
     this.game.projectilesPool.forEach((projectile) => {
-      if (!projectile.free && this.game.checkCollision(this, projectile)) {
+      if (
+        !projectile.free &&
+        this.game.checkCollision(this, projectile) &&
+        this.lives > 0
+      ) {
         this.hit(1);
         projectile.reset();
       }
     });
 
     if (this.lives < 1) {
-      this.frameX++;
+      if (this.game.spriteUpdated) this.frameX++;
 
       if (this.frameX > this.maxFrame) {
         this.markedForDeletion = true;
@@ -344,11 +361,14 @@ window.addEventListener("load", () => {
 
   const game = new Game(canvas);
 
-  function animate() {
+  let lastTime = 0;
+  function animate(timestamp) {
+    const deltaTime = timestamp - lastTime;
+    lastTime = timestamp;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    game.render(ctx);
+    game.render(ctx, deltaTime);
     requestAnimationFrame(animate);
   }
 
-  animate();
+  animate(0);
 });
