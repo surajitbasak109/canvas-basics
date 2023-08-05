@@ -25,7 +25,7 @@ class Game {
 
     // event listeners
     window.addEventListener("keydown", (event) => {
-      if (event.key == 1  && !this.fired) this.player.shoot();
+      if (event.key == 1 && !this.fired) this.player.shoot();
       this.fired = true;
       if (this.keys.indexOf(event.key) === -1) this.keys.push(event.key);
       if ((event.key == "r" || event.key == "R") && this.gameOver)
@@ -226,6 +226,7 @@ class Enemy {
 
   draw(context) {
     context.strokeRect(this.x, this.y, this.width, this.height);
+    context.drawImage(this.image, this.x, this.y);
   }
 
   update(x, y) {
@@ -254,6 +255,13 @@ class Enemy {
       this.game.gameOver = true;
       this.markedForDeletion = true;
     }
+  }
+}
+
+class Beetlemorph extends Enemy {
+  constructor(game, postionX, positionY) {
+    super(game, postionX, positionY);
+    this.image = document.getElementById('beetlemorph');
   }
 }
 
@@ -292,7 +300,7 @@ class Wave {
       for (let x = 0; x < this.game.columns; x++) {
         let enemyX = x * this.game.enemySize;
         let enemyY = y * this.game.enemySize;
-        this.enemies.push(new Enemy(this.game, enemyX, enemyY));
+        this.enemies.push(new Beetlemorph(this.game, enemyX, enemyY));
       }
     }
   }
