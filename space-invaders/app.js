@@ -10,8 +10,10 @@ class Game {
     this.numberOfProjectiles = 10;
     this.createProjectiles();
 
-    this.columns = 5;
-    this.rows = 8;
+    this.fired = false;
+
+    this.columns = 2;
+    this.rows = 2;
     this.enemySize = 60;
 
     this.waves = [];
@@ -23,11 +25,15 @@ class Game {
 
     // event listeners
     window.addEventListener("keydown", (event) => {
+      if (event.key == 1  && !this.fired) this.player.shoot();
+      this.fired = true;
       if (this.keys.indexOf(event.key) === -1) this.keys.push(event.key);
-      if (event.key == " ") this.player.shoot();
+      if ((event.key == "r" || event.key == "R") && this.gameOver)
+        this.restart();
     });
 
     window.addEventListener("keyup", (event) => {
+      this.fired = false;
       const index = this.keys.indexOf(event.key);
       if (index > -1) this.keys.splice(index, 1);
     });
@@ -92,7 +98,11 @@ class Game {
       context.font = "100px 'Cabin Sketch'";
       context.fillText("GAME OVER", canvas.width / 2, canvas.height / 2);
       context.font = "20px 'Cabin Sketch'";
-      context.fillText("Press R to restart", canvas.width / 2, canvas.height / 2 + 30);
+      context.fillText(
+        "Press R to restart",
+        canvas.width / 2,
+        canvas.height / 2 + 30,
+      );
     }
     context.restore();
   }
@@ -107,6 +117,16 @@ class Game {
     }
 
     this.waves.push(new Wave(this));
+  }
+  restart() {
+    this.player.restart();
+    this.columns = 2;
+    this.rows = 2;
+    this.waves = [];
+    this.waves.push(new Wave(this));
+    this.waveCount = 1;
+    this.score = 0;
+    this.gameOver = false;
   }
 }
 
@@ -138,6 +158,11 @@ class Player {
   shoot() {
     const projectile = this.game.getProjectile();
     projectile?.start(this.x + this.width / 2, this.y);
+  }
+  restart() {
+    this.x = this.game.width * 0.5 - this.width * 0.5;
+    this.y = this.game.height - this.height;
+    this.lives = 3;
   }
 }
 
